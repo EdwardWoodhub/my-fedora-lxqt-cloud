@@ -12,6 +12,7 @@ RUN dnf5 -y install --setopt=install_weak_deps=False \
     fastfetch \
     featherpad \
     flameshot \
+    firefox \
     firewalld \
     galculator \
     gedit \
