@@ -49,8 +49,8 @@ jobs:
           echo "Starting native Podman build..."
           sudo podman build \
             --security-opt seccomp=unconfined \
-            -t ghcr.io/edwardwoodhub/my-lxqt-cloud:latest \
-            -t ${{ secrets.ALIYUN_ACR_REGISTRY }}/edwardwoodhub/my-lxqt-cloud:latest \
+            -t ghcr.io/edwardwoodhub/my-fedora-lxqt-cloud:latest \
+            -t ${{ secrets.ALIYUN_ACR_REGISTRY }}/edwardwoodhub/my-fedora-lxqt-cloud:latest \
             -f Containerfile .
 
       # ==========================================
@@ -68,7 +68,7 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type iso \
             --rootfs ext4 \
-            ghcr.io/edwardwoodhub/my-lxqt-cloud:latest
+            ghcr.io/edwardwoodhub/my-fedora-lxqt-cloud:latest
 
           # 修复输出权限，避免 runner 用户无写权限报错
           sudo chown -R $(id -u):$(id -g) ./output/iso
@@ -78,19 +78,19 @@ jobs:
             echo "Error: 未找到生成的 ISO 文件！"
             exit 1
           fi
-          mv "$ISO_FILE" ./my-lxqt-cloud.iso
-          ls -lh ./my-lxqt-cloud.iso
+          mv "$ISO_FILE" ./my-fedora-lxqt-cloud.iso
+          ls -lh ./my-fedora-lxqt-cloud.iso
 
       - name: Split ISO
         run: |
-          split -b 1500M my-lxqt-cloud.iso my-lxqt-cloud.iso.part-
-          ls -lh my-lxqt-cloud.iso.part-*
+          split -b 1500M my-fedora-lxqt-cloud.iso my-fedora-lxqt-cloud.iso.part-
+          ls -lh my-fedora-lxqt-cloud.iso.part-*
 
       - name: Publish LiveISO to GitHub Releases
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         uses: softprops/action-gh-release@v2
         with:
-          files: my-lxqt-cloud.iso.part-*
+          files: my-fedora-lxqt-cloud.iso.part-*
           tag_name: release-${{ github.run_number }}
           name: "LXQt Cloud LiveISO Build #${{ github.run_number }}"
           body: |
@@ -98,18 +98,18 @@ jobs:
             - 镜像版本: `latest`
             - 合并分卷命令（Linux/macOS）:
               ```bash
-              cat my-lxqt-cloud.iso.part-* > my-lxqt-cloud.iso
+              cat my-fedora-lxqt-cloud.iso.part-* > my-fedora-lxqt-cloud.iso
               ```
             - 合并分卷命令（Windows PowerShell）:
               ```powershell
-              Get-Content my-lxqt-cloud.iso.part-* -ReadCount 0 -Encoding Byte | Set-Content my-lxqt-cloud.iso -Encoding Byte
+              Get-Content my-fedora-lxqt-cloud.iso.part-* -ReadCount 0 -Encoding Byte | Set-Content my-fedora-lxqt-cloud.iso -Encoding Byte
               ```
           generate_release_notes: true
 
       # 清理 ISO 文件以释放磁盘空间，避免后续构建 qcow2 时磁盘溢出
       - name: Clean ISO Files
         run: |
-          rm -rf ./output/iso ./my-lxqt-cloud.iso ./my-lxqt-cloud.iso.part-*
+          rm -rf ./output/iso ./my-fedora-lxqt-cloud.iso ./my-fedora-lxqt-cloud.iso.part-*
 
       # ==========================================
       # 阶段 2：然后生成 QCOW2 磁盘镜像并上传 Artifacts
@@ -129,7 +129,7 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type qcow2 \
             --rootfs ext4 \
-            ghcr.io/edwardwoodhub/my-lxqt-cloud:latest
+            ghcr.io/edwardwoodhub/my-fedora-lxqt-cloud:latest
 
           # 修复输出权限
           sudo chown -R $(id -u):$(id -g) ./output/qcow2
@@ -160,7 +160,7 @@ jobs:
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         run: |
           echo "Pushing directly to Aliyun ACR..."
-          sudo podman push ${{ secrets.ALIYUN_ACR_REGISTRY }}/edwardwoodhub/my-lxqt-cloud:latest
+          sudo podman push ${{ secrets.ALIYUN_ACR_REGISTRY }}/edwardwoodhub/my-fedora-lxqt-cloud:latest
 
           echo "Pushing to GHCR..."
-          sudo podman push ghcr.io/edwardwoodhub/my-lxqt-cloud:latest
+          sudo podman push ghcr.io/edwardwoodhub/my-fedora-lxqt-cloud:latest
