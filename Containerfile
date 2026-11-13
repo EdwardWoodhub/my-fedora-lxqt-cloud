@@ -3,6 +3,7 @@ FROM quay.io/fedora/fedora-bootc:44
 
 # 1. 使用 dnf5 安装桌面环境及所需软件包
 RUN dnf5 -y install --setopt=install_weak_deps=False \
+    7zip \
     adwaita-cursor-theme \
     adwaita-icon-theme \
     atril \
