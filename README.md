@@ -4,6 +4,11 @@
 
 转而采用bootc
 
+# 基座
+
+[config/packages/common.yaml @ main - atomic-desktops/config - Fedora Forge](https://forge.fedoraproject.org/atomic-desktops/config/src/branch/main/packages/common.yaml)
+
+
 # 构建产物
 
 (1) OCI镜像；
